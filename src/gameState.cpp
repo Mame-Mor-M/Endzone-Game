@@ -3,7 +3,7 @@ void GameState::getState() {
     sf::Vector2f playerPosition;
     
     int playerDowns;
-    int playerHealth;
+    int playerHealth; // Same as player durability in old version of Endzone
     int totalPoints;
     int totalYards; // Spendable, this is the in-game currency
     int pointMultiplier;
@@ -11,7 +11,6 @@ void GameState::getState() {
 
     bool gameOver;
 
-    sf::Vector2f enemyPosition;
     std::vector<sf::Vector2f> enemyPositions;
     std::vector<float> enemySpeeds;
     std::map<int, NPC> npcs;

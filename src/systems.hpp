@@ -9,7 +9,7 @@ public:
 
 class ReduceHealth {
 public:
-    void update(GameState& state, int posIndex);
+    void update(GameState& state, int posIndex, int amount);
 };
 
 class ReduceDowns {
@@ -20,6 +20,7 @@ public:
 class EnemySpawner {
 public:
     void update(GameState& state, int enemyNum);
+    void despawn(GameState& state, int index);
 };
 
 class EnemyMovement {
@@ -41,5 +42,6 @@ public:
 class MenuSystem {
 public:
     void handleEvent(GameState& state, const sf::Event& event);
+    void calculateResult(GameState& state);
 };
 

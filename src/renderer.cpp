@@ -1,15 +1,15 @@
 #include "renderer.hpp"
 #include <random>
+#include <iostream>
 
 int GenerateRandomNumber(int a, int b);
 sf::RectangleShape CreateDefender();
 
 Renderer::Renderer() {
     playerShape.setFillColor(sf::Color::Blue);
-    enemyShape = CreateDefender();
 
-    if (!font.openFromFile("assets/8-bit Arcade Out.ttf")) {// DIOWNLAOD A FONT AND LOAD HERE AFTER YOU BACK FROM WORK
-        // Print error, no font
+    if (!font.openFromFile("C:/Users/mamem/VS 2026 PROJECTS/Endzone-Game/src/assets/8-bit Arcade In.ttf")) {// DIOWNLAOD A FONT AND LOAD HERE AFTER YOU BACK FROM WORK
+        std::cerr << "Couldn't find the requested font";
     }
 
 }
@@ -18,7 +18,6 @@ void Renderer::draw(sf::RenderWindow& window, const GameState& state) {
     playerShape.setPosition(state.playerPosition);
 
     std::vector<sf::RectangleShape> enemies;
-    enemyShape.setPosition(state.enemyPosition);
 
     for(const sf::Vector2f& enemy : state.enemyPositions)
     {
@@ -41,7 +40,6 @@ void Renderer::draw(sf::RenderWindow& window, const GameState& state) {
     }
 
     window.draw(playerShape);
-    window.draw(enemyShape);
 
 
 
@@ -56,21 +54,6 @@ void Renderer::draw(sf::RenderWindow& window, const GameState& state) {
 }
 
 
-
-
-
-sf::RectangleShape CreateDefender() {
-    sf::RectangleShape enemy;
-    enemy.setSize({ 30,30 });
-    enemy.setOutlineColor(sf::Color::Red);
-    enemy.setFillColor(sf::Color::Red);
-    int x = GenerateRandomNumber(300, 700);
-    int y = GenerateRandomNumber(300, 700);
-    sf::Vector2f pos(x, y);
-    enemy.setPosition(pos);
-    return enemy;
-}
-
 // Don't use random pos for enemy yet
 int GenerateRandomNumber(int a, int b) {
     static std::mt19937 gen(std::random_device{}()); // Create generator once so we don't make a new one every call
@@ -79,22 +62,22 @@ int GenerateRandomNumber(int a, int b) {
     return distrib(gen);
 }
 
-void Renderer::drawPrompt(sf::RenderWindow& window, const GameState& state) {
+void Renderer::drawDownPrompt(sf::RenderWindow& window, const GameState& state) {
     sf::RectangleShape background;
     background.setFillColor(sf::Color::White);
-    background.setSize({100.0f,100.0f});
-    background.setPosition({ 0.0f,400.0f });
+    background.setSize({600.0f,200.0f});
+    background.setPosition({ 100.0f,450.0f });
 
-    sf::Text yesText(font, "YES - Take Health Damage", 24);
-    sf::Text noText(font, "NO - Use a Down", 24);
+    sf::Text yesText(font, "Play Down", 24);
+    sf::Text noText(font, "Forfeit Down", 24);
 
-    yesText.setPosition({ 340.f, 250.f });
-    noText.setPosition({ 340.f, 300.f });
+    yesText.setPosition({ 200.f, 450.f });
+    noText.setPosition({ 200.f, 500.f });
 
-    yesText.setFillColor(sf::Color::White);
-    noText.setFillColor(sf::Color::White);
+    yesText.setFillColor(sf::Color::Black);
+    noText.setFillColor(sf::Color::Black);
 
-    // Little triangle pointing right, used as the selection marker
+    // Little triangle pointing right, used as selection marker
     sf::ConvexShape triangle;
     triangle.setPointCount(3);
     triangle.setPoint(0, { 0.f, 0.f });
@@ -103,10 +86,70 @@ void Renderer::drawPrompt(sf::RenderWindow& window, const GameState& state) {
     triangle.setFillColor(sf::Color::Yellow);
 
     // Position it beside whichever option is selected
-    float yOffset = (state.menuSelection == 0) ? 250.f : 300.f;
-    triangle.setPosition({ 310.f, yOffset });
+    float yOffset = (state.menuSelection == 0) ? 450.f : 500.f;
+    triangle.setPosition({ 175.f, yOffset + 9.f});
 
+    window.draw(background);
     window.draw(yesText);
     window.draw(noText);
     window.draw(triangle);
+}
+
+void Renderer::drawPlayPrompt(sf::RenderWindow& window, const GameState& state) {
+    sf::RectangleShape background;
+    background.setFillColor(sf::Color::White);
+    background.setSize({ 600.0f,200.0f });
+    background.setPosition({ 100.0f,450.0f });
+
+    sf::Text actionText1(font, "Truck", 24);
+    sf::Text actionText2(font, "Juke", 24);
+
+    actionText1.setPosition({ 200.f, 450.f });
+    actionText2.setPosition({ 200.f, 500.f });
+
+    actionText1.setFillColor(sf::Color::Black);
+    actionText2.setFillColor(sf::Color::Black);
+
+    // Little triangle pointing right, used as selection marker
+    sf::ConvexShape triangle;
+    triangle.setPointCount(3);
+    triangle.setPoint(0, { 0.f, 0.f });
+    triangle.setPoint(1, { 0.f, 20.f });
+    triangle.setPoint(2, { 15.f, 10.f });
+    triangle.setFillColor(sf::Color::Yellow);
+
+    // Position it beside whichever option is selected
+    float yOffset = (state.menuSelection == 0) ? 450.f : 500.f;
+    triangle.setPosition({ 175.f, yOffset + 9.f });
+
+    window.draw(background);
+    window.draw(actionText1);
+    window.draw(actionText2);
+    window.draw(triangle);
+}
+
+void Renderer::drawResultPrompt(sf::RenderWindow& window, const GameState& state) {
+    sf::RectangleShape background;
+    background.setFillColor(sf::Color::White);
+    background.setSize({ 600.0f,200.0f });
+    background.setPosition({ 100.0f,450.0f });
+
+    sf::Text resultText(font, std::to_string(state.playerHealth), 24);
+
+    switch (state.skillMove) {
+    case(SkillMove::Truck):
+        resultText.setString("You trucked the defender! Your durability is now: ");
+        break;
+    case(SkillMove::Juke):
+        resultText.setString("You hem hemmed the defender! Your durability is now: ");
+        break;
+    }
+
+    resultText.setPosition({ 200.f, 450.f });
+
+    resultText.setFillColor(sf::Color::Black);
+
+
+    window.draw(background);
+    window.draw(resultText);
 }

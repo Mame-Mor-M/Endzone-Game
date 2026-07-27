@@ -13,12 +13,22 @@ struct NPC {
 enum class MenuState {
     None,
     Paused,
-    Prompt,
+    DownPrompt,
+    PlayPrompt,
+    ResultPrompt,
+};
+
+enum class SkillMove {
+    None,
+    Truck,
+    Juke,
+    Hurdle,
+    StiffArm,
+    Slide
 };
 
 struct GameState {
-    sf::Vector2f playerPosition{ 400.f, 300.f };
-    sf::Vector2f enemyPosition{ 300.f, 400.f };
+    sf::Vector2f playerPosition{ 390.f, 500.f };
     std::vector<sf::Vector2f> enemyPositions;
     std::vector<float> enemySpeeds;
     std::map<int, NPC> npcs{};
@@ -34,6 +44,8 @@ struct GameState {
     int playerMoveDir = 0;
 
     MenuState currentMenu = MenuState::None;
+    SkillMove skillMove = SkillMove::None;
+
     int menuSelection = 0; // 0 = first option, 1 = second option
     int enemyIndex = -1;
     void getState();

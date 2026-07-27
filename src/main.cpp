@@ -41,7 +41,19 @@ int main()
         // Render
         window.clear();
         renderer.draw(window, state);
-        renderer.drawPrompt(window, state);
+
+        if (state.currentMenu == MenuState::DownPrompt) {
+            renderer.drawDownPrompt(window, state);
+        }
+
+        if (state.currentMenu == MenuState::PlayPrompt) {
+            renderer.drawPlayPrompt(window, state);
+        }
+
+        if (state.currentMenu == MenuState::ResultPrompt) {
+            renderer.drawResultPrompt(window, state);
+        }
+        
         window.display();
     }
 }

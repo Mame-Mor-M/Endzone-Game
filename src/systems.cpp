@@ -60,14 +60,17 @@ void PlayerMovement::update(GameState& state, float dt) {
     }
 
 }
+void EnemySpawner::despawn(GameState& state, int index) {
+    state.enemyPositions.erase(state.enemyPositions.begin() + index);
+    state.enemySpeeds.erase(state.enemySpeeds.begin() + index);
+}
 
-void ReduceHealth::update(GameState& state, int posIndex) {
-    state.playerHealth -= 10;
-    //auto targetPos = std::find(state.enemyPositions.begin(), state.enemyPositions.end(), enemyPos);
-    //auto posIndex = std::distance(state.enemyPositions.begin(), targetPos);
+void ReduceHealth::update(GameState& state, int posIndex, int amount) {
+    EnemySpawner spawner;
+    state.playerHealth -= amount;
 
     state.enemyPositions[posIndex] = {100.f, 200.f};
-
+    spawner.despawn(state, posIndex);
     std::cout << "PLAYER HEALTH: " << state.playerHealth << "\n";
 
     if (state.playerHealth <= 0) {
@@ -77,8 +80,10 @@ void ReduceHealth::update(GameState& state, int posIndex) {
 }
 
 void ReduceDowns::update(GameState& state, int posIndex) {
+    EnemySpawner spawner;
     state.playerDowns -= 1;
     state.enemyPositions[posIndex] = {100.f, 200.f};
+    spawner.despawn(state, posIndex);
     std::cout << "Downs Remaining: " << state.playerDowns << "\n";
 
     if (state.playerDowns <= 0) {
@@ -88,12 +93,12 @@ void ReduceDowns::update(GameState& state, int posIndex) {
 
 void EnemySpawner::update(GameState& state, int enemyNum) {
     static std::mt19937 gen(std::random_device{}()); // Create generator once so we don't make a new one every call
-    std::uniform_int_distribution<> distrib(100, 600); // Distrib transforms the random unsigned int (no defined datatype so it could be anything)
-
+    std::uniform_int_distribution<> distribX(100, 600); // Distrib transforms the random unsigned int (no defined datatype so it could be anything)
+    std::uniform_int_distribution<> distribY(50, 100);
     for (int i = 0; i < enemyNum; i++) {
         sf::Vector2f pos;
-        pos.x = distrib(gen);
-        pos.y = distrib(gen);
+        pos.x = distribX(gen);
+        pos.y = distribY(gen);
 
         state.enemyPositions.push_back(pos);
     }
@@ -110,13 +115,13 @@ void EnemySpawner::update(GameState& state, int enemyNum) {
 
 
 void EnemyMovement::update(GameState& state, float dt) {
-    float speed = 200.0f;
+    
     EnemyOverlap collisionCheck;
     dt = std::min(dt, 1.0f / 30.0f); // Prevents enemy from being flung across screen after blocking game loop
 
     for (int i = 0; i < state.enemyPositions.size(); i++) {
         sf::Vector2f dir = state.playerPosition - state.enemyPositions[i];
-
+        float speed = state.enemySpeeds[i];
 
         if (std::abs(dir.x) >= std::abs(dir.y)) { // Buffer dist of 0.1 for following direction
             dir.y = 0;
@@ -143,7 +148,7 @@ void EnemyOverlap::update(GameState& state, int i) {
 
         std::cout << "Play down?: ";
         std::cout << std::abs(state.enemyPositions[i].x - state.playerPosition.x) << "\n";
-        state.currentMenu = MenuState::Prompt;
+        state.currentMenu = MenuState::DownPrompt;
         state.menuSelection = 0;
         state.enemyIndex = i;
 
@@ -152,38 +157,75 @@ void EnemyOverlap::update(GameState& state, int i) {
 }
 
 void MenuSystem::handleEvent(GameState& state, const sf::Event& event) {
-    if (state.currentMenu != MenuState::Prompt) {
-        return;
-    }
-
-    if (const auto* keyPressed = event.getIf<sf::Event::KeyPressed>()) {
-        if (keyPressed->code == sf::Keyboard::Key::Down || keyPressed->code == sf::Keyboard::Key::Up) {
-            state.menuSelection = 1 - state.menuSelection; // Menu == 0, then 1 - 0 is 1, menu == 1, then 1-1 is 0
-        }
-
-        if (keyPressed->code == sf::Keyboard::Key::Enter) {
-            ReduceHealth healthDeduction;
-            ReduceDowns downsDeduction;
-            int i = state.enemyIndex;
-            if (state.menuSelection == 0) {
-                downsDeduction.update(state, i);
-            }
-            else {
-                healthDeduction.update(state, i);
-            }
-            if (state.menuSelection == 0) {
-                healthDeduction.update(state, i);
-            }
-            else {
-                downsDeduction.update(state, i);
+    MenuSystem menuSystem;
+    if (state.currentMenu == MenuState::DownPrompt) {
+        if (const auto* keyPressed = event.getIf<sf::Event::KeyPressed>()) {
+            if (keyPressed->code == sf::Keyboard::Key::Down || keyPressed->code == sf::Keyboard::Key::Up || keyPressed->code == sf::Keyboard::Key::W || keyPressed->code == sf::Keyboard::Key::S) {
+                state.menuSelection = 1 - state.menuSelection; // Menu == 0, then 1 - 0 is 1, menu == 1, then 1-1 is 0
             }
 
-            state.currentMenu = MenuState::None;
-            state.enemyIndex = -1;
-            
+            if (keyPressed->code == sf::Keyboard::Key::Enter || keyPressed->code == sf::Keyboard::Key::Space) {
+                ReduceDowns downsDeduction;
+                int i = state.enemyIndex;
+                if (state.menuSelection == 0) {
+                    state.currentMenu = MenuState::PlayPrompt;
+                }
+                else {
+                    downsDeduction.update(state, i);
+                    state.currentMenu = MenuState::None;
+                    state.enemyIndex = -1;
+                }
+            }
         }
     }
 
+    else if (state.currentMenu == MenuState::PlayPrompt) {
+        if (const auto* keyPressed = event.getIf<sf::Event::KeyPressed>()) {
+            if (keyPressed->code == sf::Keyboard::Key::Down || keyPressed->code == sf::Keyboard::Key::Up || keyPressed->code == sf::Keyboard::Key::W || keyPressed->code == sf::Keyboard::Key::S) {
+                state.menuSelection = 1 - state.menuSelection; // Menu == 0, then 1 - 0 is 1, menu == 1, then 1-1 is 0
+            }
+
+            if (keyPressed->code == sf::Keyboard::Key::Enter || keyPressed->code == sf::Keyboard::Key::Space) {
+                int i = state.enemyIndex;
+                if (state.menuSelection == 0) {
+                    state.skillMove = SkillMove::Truck;
+                }
+                else if (state.menuSelection == 1){
+                    state.skillMove = SkillMove::Juke;
+                }
+                
+                menuSystem.calculateResult(state);
+
+                
+
+            }
+        }
+    }
+    else if (state.currentMenu == MenuState::ResultPrompt) {
+        if (const auto* keyPressed = event.getIf<sf::Event::KeyPressed>()) {
+            if (keyPressed->code == sf::Keyboard::Key::Enter || keyPressed->code == sf::Keyboard::Key::Space) {
+                state.currentMenu = MenuState::None;
+                state.enemyIndex = -1;
+            }
+        }
+    }
+}
+
+    
+
+void MenuSystem::calculateResult(GameState& state) {
+    int i = state.enemyIndex;
+    ReduceHealth healthDeduction;
+    ReduceDowns downsDeduction;
+    switch (state.skillMove) {
+    case (SkillMove::Truck):
+        healthDeduction.update(state, i, 10);
+        break;
+    case (SkillMove::Juke):
+        healthDeduction.update(state, i, 0);
+        break;
+    }
+    state.currentMenu = MenuState::ResultPrompt;
 }
 
 //void NPCOverlap::update(GameState& state, float dt, int i) {
@@ -193,11 +235,3 @@ void MenuSystem::handleEvent(GameState& state, const sf::Event& event) {
 void NPCSpawner::update(GameState& state, float dt) {
     state.npcs = { {1, {"Coach", 300,200}}, {2, {"Trainer", 300,300}}, {3, {"Water Boy", 300,400}}};
 }
-//
-//// Don't use random pos for enemy yet
-//int GenerateRandomNumber(int a, int b) {
-//    static std::mt19937 gen(std::random_device{}()); // Create generator once so we don't make a new one every call
-//    std::uniform_int_distribution<> distrib(a, b); // Distrib transforms the random unsigned int (no defined datatype so it could be anything)
-//
-//    return distrib(gen);
-//}
