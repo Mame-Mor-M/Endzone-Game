@@ -35,11 +35,13 @@ struct GameState {
 
     int playerDowns = 4;
     int playerHealth = 100;
+    int healthLost = 0;
     int totalPoints = 0;
     int totalYards = 0; // Spendable, this is the in-game currency
     int pointMultiplier = 1;
 
     bool gameOver = false;
+    bool successfulEncounter = true;
 
     int playerMoveDir = 0;
 

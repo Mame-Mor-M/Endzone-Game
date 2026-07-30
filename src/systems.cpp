@@ -68,6 +68,7 @@ void EnemySpawner::despawn(GameState& state, int index) {
 void ReduceHealth::update(GameState& state, int posIndex, int amount) {
     EnemySpawner spawner;
     state.playerHealth -= amount;
+    state.healthLost = amount;
 
     state.enemyPositions[posIndex] = {100.f, 200.f};
     spawner.despawn(state, posIndex);
@@ -180,9 +181,14 @@ void MenuSystem::handleEvent(GameState& state, const sf::Event& event) {
     }
 
     else if (state.currentMenu == MenuState::PlayPrompt) {
+        int menuCapacity = 3;
         if (const auto* keyPressed = event.getIf<sf::Event::KeyPressed>()) {
-            if (keyPressed->code == sf::Keyboard::Key::Down || keyPressed->code == sf::Keyboard::Key::Up || keyPressed->code == sf::Keyboard::Key::W || keyPressed->code == sf::Keyboard::Key::S) {
-                state.menuSelection = 1 - state.menuSelection; // Menu == 0, then 1 - 0 is 1, menu == 1, then 1-1 is 0
+            if (keyPressed->code == sf::Keyboard::Key::Down || keyPressed->code == sf::Keyboard::Key::S) {
+                state.menuSelection = state.menuSelection < menuCapacity - 1 ? state.menuSelection += 1 : state.menuSelection = 0; // Menu == 0, then 1 - 0 is 1, menu == 1, then 1-1 is 0
+                std::cout << state.menuSelection;
+            }
+            if (keyPressed->code == sf::Keyboard::Key::Up || keyPressed->code == sf::Keyboard::Key::W) {
+                state.menuSelection = state.menuSelection > 0 ? state.menuSelection -= 1 : state.menuSelection = menuCapacity - 1;
             }
 
             if (keyPressed->code == sf::Keyboard::Key::Enter || keyPressed->code == sf::Keyboard::Key::Space) {
@@ -192,6 +198,9 @@ void MenuSystem::handleEvent(GameState& state, const sf::Event& event) {
                 }
                 else if (state.menuSelection == 1){
                     state.skillMove = SkillMove::Juke;
+                }
+                else if (state.menuSelection == 2) {
+                    state.skillMove = SkillMove::Hurdle;
                 }
                 
                 menuSystem.calculateResult(state);
@@ -222,9 +231,13 @@ void MenuSystem::calculateResult(GameState& state) {
         healthDeduction.update(state, i, 10);
         break;
     case (SkillMove::Juke):
-        healthDeduction.update(state, i, 0);
+        healthDeduction.update(state, i, 5);
+        break;
+    case (SkillMove::Hurdle):
+        healthDeduction.update(state, i, 15);
         break;
     }
+
     state.currentMenu = MenuState::ResultPrompt;
 }
 
