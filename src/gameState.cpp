@@ -15,7 +15,6 @@ void GameState::getState() {
 
     std::vector<sf::Vector2f> enemyPositions;
     std::vector<float> enemySpeeds;
-    std::map<int, NPC> npcs;
 
     
 };

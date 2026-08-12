@@ -30,14 +30,14 @@ void Renderer::draw(sf::RenderWindow& window, const GameState& state, SceneManag
     }
     std::vector<sf::CircleShape> npcSprites;
 
-    //for (auto& [id,npc] : sceneManager.GetCurrentScene()->GetNPCs()) {
-    //    sf::CircleShape npcSprite;
-    //    npcSprite.setRadius({ 40.0f });
-    //    npcSprite.setOutlineColor(sf::Color::Yellow);
-    //    npcSprite.setFillColor(sf::Color::Yellow);
-    //    npcSprite.setPosition({npc.x, npc.y});
-    //    npcSprites.push_back(npcSprite);
-    //}
+    for (auto& [id,npc] : sceneManager.GetCurrentScene()->GetNPCs()) {
+        sf::CircleShape npcSprite;
+        npcSprite.setRadius({ 40.0f });
+        npcSprite.setOutlineColor(sf::Color::Yellow);
+        npcSprite.setFillColor(sf::Color::Yellow);
+        npcSprite.setPosition({npc.x, npc.y});
+        npcSprites.push_back(npcSprite);
+    }
 
     window.draw(playerShape);
 

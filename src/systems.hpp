@@ -39,11 +39,6 @@ public:
 };
 
 
-class NPCSpawner {
-public:
-    void update(GameState& state, float dt);
-};
-
 class MenuSystem {
 public:
     void handleEvent(GameState& state, const sf::Event& event, SceneManager& scene);

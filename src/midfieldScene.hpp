@@ -14,8 +14,6 @@ class MidfieldScene : public Scene
 		void SetEnemyPosition(int index, sf::Vector2f position);
 		void SpawnEnemy(int num);
 		void DespawnEnemy(int index);
-
-		std::map<int, NPC> GetNPCs();
 		std::vector<float> GetEnemySpeeds();
 	private:
 		std::map<int, NPC> npcs{};

@@ -5,6 +5,14 @@ class Scene {
 protected:
 	std::string name = "";
 public:
+
+	struct NPC {
+		std::string name;
+		float x = 0.f;
+		float y = 0.f;
+	};
+
+
 	virtual ~Scene() = default;
 
 	virtual void Load() = 0;
@@ -15,6 +23,6 @@ public:
 	virtual void SetEnemyPosition(int index, sf::Vector2f position) {};
 	virtual void SpawnEnemy(int num) {};
 	virtual void DespawnEnemy(int index) {};
-	//virtual std::map<int, NPC> GetNPCs() { return {}; };
+	virtual std::map<int, NPC> GetNPCs() { return {}; };
 	virtual std::vector<float> GetEnemySpeeds() { return {}; };
 };

@@ -2,6 +2,7 @@
 #include "scene.hpp"
 
 
+
 class SidelineScene : public Scene 
 {
 	protected:

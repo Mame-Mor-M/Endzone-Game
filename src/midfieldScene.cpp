@@ -3,7 +3,6 @@
 #include <random>
 
 void MidfieldScene::Load() {
-	npcs[0] = { "Coach", 200.f, 100.f };
 	name = "Midfield";
 
     SpawnEnemy(3);

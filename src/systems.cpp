@@ -38,6 +38,19 @@ void PlayerMovement::update(GameState& state, float dt) {
     }
 
 
+    if (state.playerPosition.x > 720.f ) {
+        state.playerPosition.x = state.playerPosition.x - 1;
+    }
+    if (state.playerPosition.x < 0.f) {
+        state.playerPosition.x = state.playerPosition.x + 1;
+    }
+    if (state.playerPosition.y < 0.f) {
+        state.playerPosition.y = state.playerPosition.y + 1;
+    }
+    if (state.playerPosition.y > 520.0f) {
+        state.playerPosition.y = state.playerPosition.y - 1;
+    }
+
 
 
     switch (state.playerMoveDir) {
@@ -62,11 +75,11 @@ void PlayerMovement::update(GameState& state, float dt) {
 }
 
 void SceneChange::update(GameState& state, SceneManager& scene) {
-    if (state.playerPosition.x >= 740.f && scene.currentLevel != Level::Sideline) {
+    if (state.playerPosition.x >= 720.f && scene.currentLevel != Level::Sideline) {
         scene.SetCurrentScene(0);
         state.playerPosition = { 20.f, state.playerPosition.y };
     }
-    else if (state.playerPosition.x <= -15.f && scene.currentLevel == Level::Sideline){
+    else if (state.playerPosition.x <= 0.f && scene.currentLevel == Level::Sideline){
         scene.SetCurrentScene(1);
         state.playerPosition = { 390.f, 500.f };
     }
@@ -265,6 +278,6 @@ void MenuSystem::calculateResult(GameState& state, SceneManager& scene) {
 //
 //}
 
-void NPCSpawner::update(GameState& state, float dt) {
-    state.npcs = { {1, {"Coach", 300,200}}, {2, {"Trainer", 300,300}}, {3, {"Water Boy", 300,400}}};
-}
+//void NPCSpawner::update(GameState& state, float dt) {
+//    state.npcs = { {1, {"Coach", 300,200}}, {2, {"Trainer", 300,300}}, {3, {"Water Boy", 300,400}}};
+//}

@@ -4,11 +4,7 @@
 #include<map>
 #include<string>
 
-struct NPC {
-    std::string name;
-    float x;
-    float y;
-};
+
 
 enum class MenuState {
     None,
@@ -34,7 +30,6 @@ struct GameState {
     sf::Vector2f playerPosition{ 390.f, 500.f };
     std::vector<sf::Vector2f> enemyPositions;
     std::vector<float> enemySpeeds;
-    std::map<int, NPC> npcs{};
 
     int playerDowns = 4;
     int playerHealth = 100;
