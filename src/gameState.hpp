@@ -27,6 +27,9 @@ enum class SkillMove {
     Slide
 };
 
+
+
+
 struct GameState {
     sf::Vector2f playerPosition{ 390.f, 500.f };
     std::vector<sf::Vector2f> enemyPositions;

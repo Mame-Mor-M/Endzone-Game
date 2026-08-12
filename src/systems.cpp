@@ -60,18 +60,30 @@ void PlayerMovement::update(GameState& state, float dt) {
     }
 
 }
-void EnemySpawner::despawn(GameState& state, int index) {
-    state.enemyPositions.erase(state.enemyPositions.begin() + index);
-    state.enemySpeeds.erase(state.enemySpeeds.begin() + index);
+
+void SceneChange::update(GameState& state, SceneManager& scene) {
+    if (state.playerPosition.x >= 740.f && scene.currentLevel != Level::Sideline) {
+        scene.SetCurrentScene(0);
+        state.playerPosition = { 20.f, state.playerPosition.y };
+    }
+    else if (state.playerPosition.x <= -15.f && scene.currentLevel == Level::Sideline){
+        scene.SetCurrentScene(1);
+        state.playerPosition = { 390.f, 500.f };
+    }
+}
+void EnemySpawner::despawn(int index, SceneManager& scene) {
+    //state.enemyPositions.erase(state.enemyPositions.begin() + index);
+    //state.enemySpeeds.erase(state.enemySpeeds.begin() + index);
+
+    scene.GetCurrentScene()->DespawnEnemy(index);
 }
 
-void ReduceHealth::update(GameState& state, int posIndex, int amount) {
+void ReduceHealth::update(GameState& state, int posIndex, int amount, SceneManager& scene) {
     EnemySpawner spawner;
     state.playerHealth -= amount;
     state.healthLost = amount;
 
-    state.enemyPositions[posIndex] = {100.f, 200.f};
-    spawner.despawn(state, posIndex);
+    spawner.despawn(posIndex, scene);
     std::cout << "PLAYER HEALTH: " << state.playerHealth << "\n";
 
     if (state.playerHealth <= 0) {
@@ -80,11 +92,11 @@ void ReduceHealth::update(GameState& state, int posIndex, int amount) {
     }
 }
 
-void ReduceDowns::update(GameState& state, int posIndex) {
+void ReduceDowns::update(GameState& state, int posIndex, SceneManager& scene) {
     EnemySpawner spawner;
     state.playerDowns -= 1;
-    state.enemyPositions[posIndex] = {100.f, 200.f};
-    spawner.despawn(state, posIndex);
+
+    spawner.despawn(posIndex, scene);
     std::cout << "Downs Remaining: " << state.playerDowns << "\n";
 
     if (state.playerDowns <= 0) {
@@ -92,7 +104,7 @@ void ReduceDowns::update(GameState& state, int posIndex) {
     }
 }
 
-void EnemySpawner::update(GameState& state, int enemyNum) {
+void EnemySpawner::update(GameState& state, int enemyNum, SceneManager& scene) {
     static std::mt19937 gen(std::random_device{}()); // Create generator once so we don't make a new one every call
     std::uniform_int_distribution<> distribX(100, 600); // Distrib transforms the random unsigned int (no defined datatype so it could be anything)
     std::uniform_int_distribution<> distribY(50, 100);
@@ -102,6 +114,7 @@ void EnemySpawner::update(GameState& state, int enemyNum) {
         pos.y = distribY(gen);
 
         state.enemyPositions.push_back(pos);
+
     }
 
     std::uniform_int_distribution<> distribSpeed(100, 300);
@@ -110,19 +123,23 @@ void EnemySpawner::update(GameState& state, int enemyNum) {
         sf::Vector2f pos;
         float speed = distribSpeed(gen);
         state.enemySpeeds.push_back(speed);
+
+        scene.GetCurrentScene()->GetEnemySpeeds().push_back(speed);
     }
 
 }
 
 
-void EnemyMovement::update(GameState& state, float dt) {
+void EnemyMovement::update(GameState& state, float dt, SceneManager& sceneManager) {
     
     EnemyOverlap collisionCheck;
     dt = std::min(dt, 1.0f / 30.0f); // Prevents enemy from being flung across screen after blocking game loop
+    std::vector<sf::Vector2f> enemyPositions = sceneManager.GetCurrentScene()->GetEnemyPositions();
+    std::vector<float> enemySpeeds = sceneManager.GetCurrentScene()->GetEnemySpeeds();
 
-    for (int i = 0; i < state.enemyPositions.size(); i++) {
-        sf::Vector2f dir = state.playerPosition - state.enemyPositions[i];
-        float speed = state.enemySpeeds[i];
+    for (int i = 0; i < enemyPositions.size(); i++) {
+        sf::Vector2f dir = state.playerPosition - enemyPositions[i];
+        float speed = enemySpeeds[i];
 
         if (std::abs(dir.x) >= std::abs(dir.y)) { // Buffer dist of 0.1 for following direction
             dir.y = 0;
@@ -133,22 +150,25 @@ void EnemyMovement::update(GameState& state, float dt) {
             dir.y = (dir.y > 0) ? 1.0f : -1.0f;
         }
         
-        state.enemyPositions[i] += dir * speed * dt;
+        
+        enemyPositions[i] += dir * speed * dt;
 
-        collisionCheck.update(state, i);
+        sceneManager.GetCurrentScene()->SetEnemyPosition(i, enemyPositions[i]);
+
+        collisionCheck.update(state, i, sceneManager);
     }
 }
 
-void EnemyOverlap::update(GameState& state, int i) {
+void EnemyOverlap::update(GameState& state, int i, SceneManager& sceneManager) {
     MenuSystem gameMenu;
     sf::Vector2f collisionDist = { 10.0f, 10.0f };
     int response = -1;
 
-    // Checks if enemy is colliding with player, currently resets pos for all enemies
-    if (std::abs(state.enemyPositions[i].x - state.playerPosition.x) <= collisionDist.x && std::abs(state.enemyPositions[i].y - state.playerPosition.y) <= collisionDist.y) {
+    std::vector<sf::Vector2f> enemyPositions = sceneManager.GetCurrentScene()->GetEnemyPositions();
 
-        std::cout << "Play down?: ";
-        std::cout << std::abs(state.enemyPositions[i].x - state.playerPosition.x) << "\n";
+    // Checks if enemy is colliding with player, currently resets pos for all enemies
+    if (std::abs(enemyPositions[i].x - state.playerPosition.x) <= collisionDist.x && std::abs(enemyPositions[i].y - state.playerPosition.y) <= collisionDist.y) {
+
         state.currentMenu = MenuState::DownPrompt;
         state.menuSelection = 0;
         state.enemyIndex = i;
@@ -157,7 +177,7 @@ void EnemyOverlap::update(GameState& state, int i) {
 
 }
 
-void MenuSystem::handleEvent(GameState& state, const sf::Event& event) {
+void MenuSystem::handleEvent(GameState& state, const sf::Event& event, SceneManager& scene) {
     MenuSystem menuSystem;
     if (state.currentMenu == MenuState::DownPrompt) {
         if (const auto* keyPressed = event.getIf<sf::Event::KeyPressed>()) {
@@ -172,7 +192,7 @@ void MenuSystem::handleEvent(GameState& state, const sf::Event& event) {
                     state.currentMenu = MenuState::PlayPrompt;
                 }
                 else {
-                    downsDeduction.update(state, i);
+                    downsDeduction.update(state, i, scene);
                     state.currentMenu = MenuState::None;
                     state.enemyIndex = -1;
                 }
@@ -203,7 +223,7 @@ void MenuSystem::handleEvent(GameState& state, const sf::Event& event) {
                     state.skillMove = SkillMove::Hurdle;
                 }
                 
-                menuSystem.calculateResult(state);
+                menuSystem.calculateResult(state, scene);
 
                 
 
@@ -222,19 +242,19 @@ void MenuSystem::handleEvent(GameState& state, const sf::Event& event) {
 
     
 
-void MenuSystem::calculateResult(GameState& state) {
+void MenuSystem::calculateResult(GameState& state, SceneManager& scene) {
     int i = state.enemyIndex;
     ReduceHealth healthDeduction;
     ReduceDowns downsDeduction;
     switch (state.skillMove) {
     case (SkillMove::Truck):
-        healthDeduction.update(state, i, 10);
+        healthDeduction.update(state, i, 10, scene );
         break;
     case (SkillMove::Juke):
-        healthDeduction.update(state, i, 5);
+        healthDeduction.update(state, i, 5, scene);
         break;
     case (SkillMove::Hurdle):
-        healthDeduction.update(state, i, 15);
+        healthDeduction.update(state, i, 15, scene);
         break;
     }
 

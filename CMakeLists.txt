@@ -12,7 +12,7 @@ FetchContent_Declare(SFML
     SYSTEM)
 FetchContent_MakeAvailable(SFML)
 
-add_executable(main src/main.cpp "src/gameState.cpp" "src/systems.cpp" "src/renderer.cpp")
+add_executable(main src/main.cpp "src/gameState.cpp" "src/systems.cpp" "src/renderer.cpp"  "src/sidelineScene.cpp"  "src/sceneManager.cpp" "src/midfieldScene.cpp")
 target_compile_features(main PRIVATE cxx_std_17)
 target_link_libraries(main PRIVATE SFML::Graphics)
 

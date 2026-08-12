@@ -9,14 +9,17 @@ int main()
 
     GameState state;
     MenuSystem menuSystem;
+    SceneManager sceneManager;
     PlayerMovement movementSystem;
     EnemyMovement enemyMovement;
     EnemySpawner enemySpawner;
     Renderer renderer;
+    SceneChange sceneChanger;
 
-    enemySpawner.update(state, 4);
+    //enemySpawner.update(state, 2, sceneManager);
 
     sf::Clock clock;
+    sceneManager.GetCurrentScene()->Load();
 
     while (window.isOpen())
     {
@@ -27,20 +30,21 @@ int main()
             if (event->is<sf::Event::Closed>())
                 window.close();
             
-            menuSystem.handleEvent(state, *event);
+            menuSystem.handleEvent(state, *event, sceneManager);
         }
 
         if (state.gameOver == false && state.currentMenu == MenuState::None) {
             movementSystem.update(state, dt);
-            enemyMovement.update(state, dt);
+            enemyMovement.update(state, dt, sceneManager);
             
         }
 
+        sceneChanger.update(state, sceneManager);
         
 
         // Render
         window.clear();
-        renderer.draw(window, state);
+        renderer.draw(window, state, sceneManager);
 
         if (state.currentMenu == MenuState::DownPrompt) {
             renderer.drawDownPrompt(window, state);

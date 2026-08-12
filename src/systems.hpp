@@ -1,36 +1,41 @@
 #pragma once
 #include "gameState.hpp"
+#include "sceneManager.hpp"
 #include <SFML/Window/Event.hpp>
 
 class PlayerMovement {
 public:
     void update(GameState& state, float dt);
 };
+class SceneChange {
+public:
+    void update(GameState& state, SceneManager& scene);
+};
 
 class ReduceHealth {
 public:
-    void update(GameState& state, int posIndex, int amount);
+    void update(GameState& state, int posIndex, int amount, SceneManager& scene);
 };
 
 class ReduceDowns {
 public:
-    void update(GameState& state, int posIndex);
+    void update(GameState& state, int posIndex, SceneManager& scene);
 };
 
 class EnemySpawner {
 public:
-    void update(GameState& state, int enemyNum);
-    void despawn(GameState& state, int index);
+    void update(GameState& state, int enemyNum, SceneManager& scene);
+    void despawn(int index, SceneManager& scene);
 };
 
 class EnemyMovement {
 public:
-    void update(GameState& state, float dt);
+    void update(GameState& state, float dt, SceneManager& sceneManager);
 };
 
 class EnemyOverlap {
 public:
-    void update(GameState& state, int posIndex);
+    void update(GameState& state, int posIndex, SceneManager& scene);
 };
 
 
@@ -41,7 +46,7 @@ public:
 
 class MenuSystem {
 public:
-    void handleEvent(GameState& state, const sf::Event& event);
-    void calculateResult(GameState& state);
+    void handleEvent(GameState& state, const sf::Event& event, SceneManager& scene);
+    void calculateResult(GameState& state, SceneManager& scene);
 };
 

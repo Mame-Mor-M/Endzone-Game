@@ -1,6 +1,7 @@
 #include "renderer.hpp"
 #include <random>
 #include <iostream>
+#include "sceneManager.hpp"
 
 int GenerateRandomNumber(int a, int b);
 sf::RectangleShape CreateDefender();
@@ -14,12 +15,11 @@ Renderer::Renderer() {
 
 }
 
-void Renderer::draw(sf::RenderWindow& window, const GameState& state) {
+void Renderer::draw(sf::RenderWindow& window, const GameState& state, SceneManager& sceneManager) {
     playerShape.setPosition(state.playerPosition);
-
     std::vector<sf::RectangleShape> enemies;
 
-    for(const sf::Vector2f& enemy : state.enemyPositions)
+    for(const sf::Vector2f& enemy : sceneManager.GetCurrentScene()->GetEnemyPositions())
     {
         sf::RectangleShape enemySprite;
         enemySprite.setSize({ 40,40 });
@@ -30,14 +30,14 @@ void Renderer::draw(sf::RenderWindow& window, const GameState& state) {
     }
     std::vector<sf::CircleShape> npcSprites;
 
-    for (auto& [id,npc] :state.npcs) {
-        sf::CircleShape npcSprite;
-        npcSprite.setRadius({ 40.0f });
-        npcSprite.setOutlineColor(sf::Color::Yellow);
-        npcSprite.setFillColor(sf::Color::Yellow);
-        npcSprite.setPosition({npc.x, npc.y});
-        npcSprites.push_back(npcSprite);
-    }
+    //for (auto& [id,npc] : sceneManager.GetCurrentScene()->GetNPCs()) {
+    //    sf::CircleShape npcSprite;
+    //    npcSprite.setRadius({ 40.0f });
+    //    npcSprite.setOutlineColor(sf::Color::Yellow);
+    //    npcSprite.setFillColor(sf::Color::Yellow);
+    //    npcSprite.setPosition({npc.x, npc.y});
+    //    npcSprites.push_back(npcSprite);
+    //}
 
     window.draw(playerShape);
 
