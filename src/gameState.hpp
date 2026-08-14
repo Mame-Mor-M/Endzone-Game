@@ -12,6 +12,8 @@ enum class MenuState {
     DownPrompt,
     PlayPrompt,
     ResultPrompt,
+    LevelPrompt,
+    NPCPrompt,
 };
 
 enum class SkillMove {

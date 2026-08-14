@@ -30,14 +30,17 @@ void Renderer::draw(sf::RenderWindow& window, const GameState& state, SceneManag
     }
     std::vector<sf::CircleShape> npcSprites;
 
-    for (auto& [id,npc] : sceneManager.GetCurrentScene()->GetNPCs()) {
-        sf::CircleShape npcSprite;
-        npcSprite.setRadius({ 40.0f });
-        npcSprite.setOutlineColor(sf::Color::Yellow);
-        npcSprite.setFillColor(sf::Color::Yellow);
-        npcSprite.setPosition({npc.x, npc.y});
-        npcSprites.push_back(npcSprite);
+    if (sceneManager.currentLevel == Level::Sideline) {
+        for (auto& [id, npc] : sceneManager.GetCurrentScene()->GetNPCs()) {
+            sf::CircleShape npcSprite;
+            npcSprite.setRadius({ 40.0f });
+            npcSprite.setOutlineColor(sf::Color::Yellow);
+            npcSprite.setFillColor(sf::Color::Yellow);
+            npcSprite.setPosition({ npc->x, npc->y });
+            npcSprites.push_back(npcSprite);
+        }
     }
+
 
     window.draw(playerShape);
 
@@ -68,12 +71,15 @@ void Renderer::drawDownPrompt(sf::RenderWindow& window, const GameState& state) 
     background.setSize({600.0f,200.0f});
     background.setPosition({ 100.0f,450.0f });
 
+    sf::Text promptText(font, "Would you like to:", 24);
     sf::Text yesText(font, "Play Down", 24);
     sf::Text noText(font, "Forfeit Down", 24);
 
-    yesText.setPosition({ 200.f, 450.f });
-    noText.setPosition({ 200.f, 500.f });
+    promptText.setPosition({ 200.f, 450.f });
+    yesText.setPosition({ 200.f, 490.f });
+    noText.setPosition({ 200.f, 520.f });
 
+    promptText.setFillColor(sf::Color::Black);
     yesText.setFillColor(sf::Color::Black);
     noText.setFillColor(sf::Color::Black);
 
@@ -86,10 +92,11 @@ void Renderer::drawDownPrompt(sf::RenderWindow& window, const GameState& state) 
     triangle.setFillColor(sf::Color::Yellow);
 
     // Position it beside whichever option is selected
-    float yOffset = (state.menuSelection == 0) ? 450.f : 500.f;
+    float yOffset = (state.menuSelection == 0) ? 490.f : 520.f;
     triangle.setPosition({ 175.f, yOffset + 9.f});
 
     window.draw(background);
+    window.draw(promptText);
     window.draw(yesText);
     window.draw(noText);
     window.draw(triangle);
@@ -196,4 +203,45 @@ void Renderer::drawResultPrompt(sf::RenderWindow& window, const GameState& state
 
     window.draw(background);
     window.draw(resultText);
+}
+
+void Renderer::drawChangeLevelPrompt(sf::RenderWindow& window, const GameState& state, SceneManager& sceneManager) {
+    sf::RectangleShape background;
+    background.setFillColor(sf::Color::White);
+    background.setSize({ 600.0f,200.0f });
+    background.setPosition({ 100.0f,450.0f });
+    sf::Text promptText(font, "Enter the Field?", 24);
+
+    if (sceneManager.currentLevel != Level::Sideline) {
+        promptText.setString("Go to the Sideline?");
+    }
+    
+    sf::Text yesText(font, "Yes", 24);
+    sf::Text noText(font, "No", 24);
+
+    promptText.setPosition({ 200.f, 450.f });
+    yesText.setPosition({ 200.f, 490.f });
+    noText.setPosition({ 200.f, 520.f });
+
+    promptText.setFillColor(sf::Color::Black);
+    yesText.setFillColor(sf::Color::Black);
+    noText.setFillColor(sf::Color::Black);
+
+    // Little triangle pointing right, used as selection marker
+    sf::ConvexShape triangle;
+    triangle.setPointCount(3);
+    triangle.setPoint(0, { 0.f, 0.f });
+    triangle.setPoint(1, { 0.f, 20.f });
+    triangle.setPoint(2, { 15.f, 10.f });
+    triangle.setFillColor(sf::Color::Yellow);
+
+    // Position it beside whichever option is selected
+    float yOffset = (state.menuSelection == 0) ? 490.f : 520.f;
+    triangle.setPosition({ 175.f, yOffset + 9.f });
+
+    window.draw(background);
+    window.draw(promptText);
+    window.draw(yesText);
+    window.draw(noText);
+    window.draw(triangle);
 }

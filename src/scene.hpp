@@ -10,6 +10,8 @@ public:
 		std::string name;
 		float x = 0.f;
 		float y = 0.f;
+
+		NPC(std::string name, float x, float y) : name(name), x(x), y(y) {}
 	};
 
 
@@ -23,6 +25,6 @@ public:
 	virtual void SetEnemyPosition(int index, sf::Vector2f position) {};
 	virtual void SpawnEnemy(int num) {};
 	virtual void DespawnEnemy(int index) {};
-	virtual std::map<int, NPC> GetNPCs() { return {}; };
+	virtual const std::map<int, std::unique_ptr<NPC>>& GetNPCs() { return {}; };
 	virtual std::vector<float> GetEnemySpeeds() { return {}; };
 };

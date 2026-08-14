@@ -2,7 +2,10 @@
 #include <iostream>
 
 void SidelineScene::Load() {
-	npcs = { {1, {"Coach", 360,20}}, {2, {"Trainer", 700,250}}, {3, {"Water Boy", 360,500}} };
+	npcs[1] = std::make_unique<NPC>("Coach", 360, 20);
+	npcs[2] = std::make_unique<NPC>("Trainer", 700, 250);
+	npcs[3] = std::make_unique<NPC>("Water Boy", 360, 500);
+
 	name = "Sideline";
 }
 
@@ -10,7 +13,7 @@ void SidelineScene::Update(float dt) {
 
 }
 
-std::map<int, Scene::NPC> SidelineScene::GetNPCs() {
+const std::map<int, std::unique_ptr<Scene::NPC>>& SidelineScene::GetNPCs() {
 	return npcs;
 }
 

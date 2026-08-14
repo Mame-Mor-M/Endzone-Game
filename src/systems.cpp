@@ -44,9 +44,11 @@ void PlayerMovement::update(GameState& state, float dt) {
     if (state.playerPosition.x < 0.f) {
         state.playerPosition.x = state.playerPosition.x + 1;
     }
+
     if (state.playerPosition.y < 0.f) {
         state.playerPosition.y = state.playerPosition.y + 1;
     }
+
     if (state.playerPosition.y > 520.0f) {
         state.playerPosition.y = state.playerPosition.y - 1;
     }
@@ -76,13 +78,21 @@ void PlayerMovement::update(GameState& state, float dt) {
 
 void SceneChange::update(GameState& state, SceneManager& scene) {
     if (state.playerPosition.x >= 720.f && scene.currentLevel != Level::Sideline) {
-        scene.SetCurrentScene(0);
-        state.playerPosition = { 20.f, state.playerPosition.y };
+        state.currentMenu = MenuState::LevelPrompt;
     }
     else if (state.playerPosition.x <= 0.f && scene.currentLevel == Level::Sideline){
-        scene.SetCurrentScene(1);
-        state.playerPosition = { 390.f, 500.f };
+        state.currentMenu = MenuState::LevelPrompt;
     }
+    else if (state.playerPosition.y <= 0 && scene.currentLevel != Level::Sideline) {
+        int index = static_cast<int>(scene.currentLevel);
+        if (index < static_cast<size_t>(Level::Count) - 1) {
+            index += 1;
+            scene.SetCurrentScene(index);
+            state.playerPosition = { 390.f, 500.f };
+        }
+
+    }
+    
 }
 void EnemySpawner::despawn(int index, SceneManager& scene) {
     //state.enemyPositions.erase(state.enemyPositions.begin() + index);
@@ -190,6 +200,24 @@ void EnemyOverlap::update(GameState& state, int i, SceneManager& sceneManager) {
 
 }
 
+void NPCOverlap::update(GameState& state, SceneManager& sceneManager) {
+    MenuSystem gameMenu;
+    sf::Vector2f collisionDist = { 80.0f, 80.0f };
+
+    const std::map<int,std::unique_ptr<Scene::NPC>>& npcs = sceneManager.GetCurrentScene()->GetNPCs();
+
+    if (npcs.empty()) {
+        return;
+    }
+
+    for (auto& [id, npc] : npcs) {
+        if (std::abs(npc->x - state.playerPosition.x) <= collisionDist.x && std::abs(npc->y - state.playerPosition.y) <= collisionDist.y) {
+            state.currentMenu = MenuState::NPCPrompt;
+            std::cout << "IT'S WORKING";
+        }
+    }
+}
+
 void MenuSystem::handleEvent(GameState& state, const sf::Event& event, SceneManager& scene) {
     MenuSystem menuSystem;
     if (state.currentMenu == MenuState::DownPrompt) {
@@ -251,6 +279,32 @@ void MenuSystem::handleEvent(GameState& state, const sf::Event& event, SceneMana
             }
         }
     }
+
+    else if (state.currentMenu == MenuState::LevelPrompt) {
+        if (const auto* keyPressed = event.getIf<sf::Event::KeyPressed>()) {
+            if (keyPressed->code == sf::Keyboard::Key::Down || keyPressed->code == sf::Keyboard::Key::Up || keyPressed->code == sf::Keyboard::Key::W || keyPressed->code == sf::Keyboard::Key::S) {
+                state.menuSelection = 1 - state.menuSelection; 
+            }
+
+            if (keyPressed->code == sf::Keyboard::Key::Enter || keyPressed->code == sf::Keyboard::Key::Space) {
+                if (state.menuSelection == 0) {
+                    if (scene.currentLevel == Level::Sideline) {
+                        scene.SetCurrentScene(1);
+                        state.playerPosition = { 390.f, 500.f };
+                    }
+                    else {
+                        scene.SetCurrentScene(0);
+                        state.playerPosition = { 20.f, state.playerPosition.y };
+                    }
+                    state.currentMenu = MenuState::None;
+                    state.enemyIndex = -1;
+                }
+                else {
+                    state.currentMenu = MenuState::None;
+                }
+            }
+        }
+    }
 }
 
     
@@ -270,7 +324,7 @@ void MenuSystem::calculateResult(GameState& state, SceneManager& scene) {
         healthDeduction.update(state, i, 15, scene);
         break;
     }
-
+    state.menuSelection = 0;
     state.currentMenu = MenuState::ResultPrompt;
 }
 

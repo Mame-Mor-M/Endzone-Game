@@ -2,20 +2,21 @@
 #include "scene.hpp"
 
 
-
-class SidelineScene : public Scene 
+class OwnTerritoryScene : public Scene 
 {
 	protected:
-		std::string name = "Sideline";
+		std::string name = "OwnTerritory";
 	public:
 		void Load() override;
 		void Update(float dt) override;
 
 		std::vector<sf::Vector2f> GetEnemyPositions();
-		const std::map<int, std::unique_ptr<NPC>>& GetNPCs();
+		void SetEnemyPosition(int index, sf::Vector2f position);
+		void SpawnEnemy(int num);
+		void DespawnEnemy(int index);
 		std::vector<float> GetEnemySpeeds();
 	private:
-		std::map<int, std::unique_ptr<NPC>> npcs{};
+		std::map<int, NPC> npcs{};
 		std::vector<sf::Vector2f> enemyPositions;
 		std::vector<float> enemySpeeds;
 };

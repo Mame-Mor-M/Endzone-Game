@@ -3,6 +3,8 @@
 #include "sceneManager.hpp"
 #include <SFML/Window/Event.hpp>
 
+struct NPC;
+
 class PlayerMovement {
 public:
     void update(GameState& state, float dt);
@@ -36,6 +38,11 @@ public:
 class EnemyOverlap {
 public:
     void update(GameState& state, int posIndex, SceneManager& scene);
+};
+
+class NPCOverlap {
+public:
+    void update(GameState& state, SceneManager& scene);
 };
 
 

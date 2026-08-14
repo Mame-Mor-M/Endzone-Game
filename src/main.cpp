@@ -15,6 +15,7 @@ int main()
     EnemySpawner enemySpawner;
     Renderer renderer;
     SceneChange sceneChanger;
+    NPCOverlap npcInteraction;
 
     //enemySpawner.update(state, 2, sceneManager);
 
@@ -36,6 +37,7 @@ int main()
         if (state.gameOver == false && state.currentMenu == MenuState::None) {
             movementSystem.update(state, dt);
             enemyMovement.update(state, dt, sceneManager);
+            npcInteraction.update(state, sceneManager);
             
         }
 
@@ -56,6 +58,9 @@ int main()
 
         if (state.currentMenu == MenuState::ResultPrompt) {
             renderer.drawResultPrompt(window, state);
+        }
+        if (state.currentMenu == MenuState::LevelPrompt) {
+            renderer.drawChangeLevelPrompt(window, state, sceneManager);
         }
         
         window.display();

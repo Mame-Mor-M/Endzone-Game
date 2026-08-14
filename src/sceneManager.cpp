@@ -13,8 +13,16 @@ void SceneManager::SetCurrentScene(int sceneIndex) {
 		currentLevel = Level::Sideline;
 		break;
 	case(1):
+		currentScene = new OwnTerritoryScene();
+		currentLevel = Level::OwnTerritory;
+		break;
+	case(2):
 		currentScene = new MidfieldScene();
 		currentLevel = Level::Midfield;
+		break;
+	case(3):
+		currentScene = new OpposingTerritoryScene();
+		currentLevel = Level::OpposingTerritory;
 		break;
 	}
 	currentScene->Load();
