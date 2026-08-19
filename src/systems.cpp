@@ -107,7 +107,7 @@ void ReduceHealth::update(GameState& state, int posIndex, int amount, SceneManag
     state.healthLost = amount;
 
     spawner.despawn(posIndex, scene);
-    std::cout << "PLAYER HEALTH: " << state.playerHealth << "\n";
+    std::cout << "PLAYER ReduceHealth: " << state.playerHealth << "\n";
 
     if (state.playerHealth <= 0) {
         std::cout << "GAME OVER! YOU LOSE"  << "\n";
@@ -120,10 +120,10 @@ void ReduceDowns::update(GameState& state, int posIndex, SceneManager& scene) {
     state.playerDowns -= 1;
 
     spawner.despawn(posIndex, scene);
-    std::cout << "Downs Remaining: " << state.playerDowns << "\n";
+    std::cout << "ReduceDowns Remaining: " << state.playerDowns << "\n";
 
     if (state.playerDowns <= 0) {
-        std::cout << "GO TO THE SIDELINE AND WAIT FOR DOWNS TO RECHARGE" << "\n";
+        std::cout << "GO TO THE SIDELINE AND WAIT FOR ReduceDowns TO RECHARGE" << "\n";
     }
 }
 
@@ -184,6 +184,7 @@ void EnemyMovement::update(GameState& state, float dt, SceneManager& sceneManage
 
 void EnemyOverlap::update(GameState& state, int i, SceneManager& sceneManager) {
     MenuSystem gameMenu;
+    EnemyRoll enemyRoll;
     sf::Vector2f collisionDist = { 10.0f, 10.0f };
     int response = -1;
 
@@ -195,9 +196,36 @@ void EnemyOverlap::update(GameState& state, int i, SceneManager& sceneManager) {
         state.currentMenu = MenuState::DownPrompt;
         state.menuSelection = 0;
         state.enemyIndex = i;
+        enemyRoll.update(state);
 
     }
 
+}
+
+void EnemyRoll::update(GameState& state) {
+
+    RollNumber rollNum;
+
+    TackleType tackle = static_cast<TackleType>(rollNum.update(0, 2));
+
+    switch (tackle) {
+    case (0):
+        std::cout << "High Tackle";
+        state.opponentTackle = TackleType::High;
+        state.opponentRoll = rollNum.update(1, 3);
+        break;
+    case (1):
+        std::cout << "Low Tackle";
+        state.opponentTackle = TackleType::Low;
+        state.opponentRoll = rollNum.update(4, 10);
+        break;
+    case (2):
+        std::cout << "Hit Stick Tackle";
+        state.opponentTackle = TackleType::HitStick;
+        state.opponentRoll = rollNum.update(1, 10);
+        break;
+    }
+    
 }
 
 void NPCOverlap::update(GameState& state, SceneManager& sceneManager) {
@@ -211,9 +239,12 @@ void NPCOverlap::update(GameState& state, SceneManager& sceneManager) {
     }
 
     for (auto& [id, npc] : npcs) {
-        if (std::abs(npc->x - state.playerPosition.x) <= collisionDist.x && std::abs(npc->y - state.playerPosition.y) <= collisionDist.y) {
-            state.currentMenu = MenuState::NPCPrompt;
-            std::cout << "IT'S WORKING";
+        if (std::abs(npc->x - state.playerPosition.x) <= collisionDist.x && std::abs(npc->y - state.playerPosition.y) <= collisionDist.y ) {
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::J)) {
+                state.currentMenu = MenuState::NPCPrompt;
+                state.currentNPC = npc->name;
+            }
+
         }
     }
 }
@@ -242,6 +273,8 @@ void MenuSystem::handleEvent(GameState& state, const sf::Event& event, SceneMana
     }
 
     else if (state.currentMenu == MenuState::PlayPrompt) {
+        RollNumber rollNum;
+        JudgeEncounter judge;
         int menuCapacity = 3;
         if (const auto* keyPressed = event.getIf<sf::Event::KeyPressed>()) {
             if (keyPressed->code == sf::Keyboard::Key::Down || keyPressed->code == sf::Keyboard::Key::S) {
@@ -256,14 +289,17 @@ void MenuSystem::handleEvent(GameState& state, const sf::Event& event, SceneMana
                 int i = state.enemyIndex;
                 if (state.menuSelection == 0) {
                     state.skillMove = SkillMove::Truck;
+                    state.playerRoll = rollNum.update(state.truckProficiency * 1.5, 10);
                 }
                 else if (state.menuSelection == 1){
                     state.skillMove = SkillMove::Juke;
+                    state.playerRoll = rollNum.update(state.jukeProficiency * 1.5, 10);
                 }
                 else if (state.menuSelection == 2) {
                     state.skillMove = SkillMove::Hurdle;
+                    state.playerRoll = rollNum.update(state.hurdleProficiency * 1.5, 10);
                 }
-                
+                judge.update(state);
                 menuSystem.calculateResult(state, scene);
 
                 
@@ -271,6 +307,25 @@ void MenuSystem::handleEvent(GameState& state, const sf::Event& event, SceneMana
             }
         }
     }
+
+    else if (state.currentMenu == MenuState::NPCPrompt) {
+        if (const auto* keyPressed = event.getIf<sf::Event::KeyPressed>()) {
+            if (keyPressed->code == sf::Keyboard::Key::Down || keyPressed->code == sf::Keyboard::Key::Up || keyPressed->code == sf::Keyboard::Key::W || keyPressed->code == sf::Keyboard::Key::S) {
+                state.menuSelection = 1 - state.menuSelection; // Menu == 0, then 1 - 0 is 1, menu == 1, then 1-1 is 0
+            }
+
+            if (keyPressed->code == sf::Keyboard::Key::Enter || keyPressed->code == sf::Keyboard::Key::Space) {
+                if (state.menuSelection == 0) {
+                    state.currentMenu = MenuState::None;
+                }
+                else {
+                    state.currentMenu = MenuState::None;
+                }
+                state.currentNPC = "";
+            }
+        }
+    }
+
     else if (state.currentMenu == MenuState::ResultPrompt) {
         if (const auto* keyPressed = event.getIf<sf::Event::KeyPressed>()) {
             if (keyPressed->code == sf::Keyboard::Key::Enter || keyPressed->code == sf::Keyboard::Key::Space) {
@@ -328,10 +383,38 @@ void MenuSystem::calculateResult(GameState& state, SceneManager& scene) {
     state.currentMenu = MenuState::ResultPrompt;
 }
 
-//void NPCOverlap::update(GameState& state, float dt, int i) {
-//
-//}
+int RollNumber::update(int min, int max) {
+    static std::mt19937 gen(std::random_device{}()); // Create generator once so we don't make a new one every call
+    std::uniform_int_distribution<> distrib(min, max);
+    return distrib(gen);
+}
 
-//void NPCSpawner::update(GameState& state, float dt) {
-//    state.npcs = { {1, {"Coach", 300,200}}, {2, {"Trainer", 300,300}}, {3, {"Water Boy", 300,400}}};
-//}
+void JudgeEncounter::update(GameState& state) {
+    int playerRoll = state.playerRoll;
+    int opponentRoll = state.opponentRoll;
+    int result = playerRoll - opponentRoll; // Positive number -> player wins, negative number -> enemy wins
+
+
+    if (state.opponentTackle == state.skill_counters[state.skillMove]) {
+        result -= 5;
+    }
+
+    if (state.skillMove == state.tackle_counters[state.opponentTackle]) {
+        result += 5;
+    }
+
+    if (result > 0) {
+        // Player wins, check what type of skill move it was. A successful hurdle causes no reduction in health but lowers stamina tremendously
+    }
+    else if (result < 0) {
+        // Enemy wins, if the enemy had a successful hit stick, cause a tremendous blow to health and stamina, especially if player hurdled
+    }
+    else{
+    // Upon a tie, deduct minimal health and stamina
+    }
+
+    std::cout << "\nYou rolled: " << playerRoll << "\nThe opponent rolled: " << opponentRoll << "\nFinal result: " << result << "\n";
+
+
+
+}

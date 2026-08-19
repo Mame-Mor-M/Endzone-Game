@@ -13,6 +13,7 @@ public:
     void drawPlayPrompt(sf::RenderWindow& window, const GameState& state);
     void drawResultPrompt(sf::RenderWindow& window, const GameState& state);
     void drawChangeLevelPrompt(sf::RenderWindow& window, const GameState& state, SceneManager& sceneManager);
+    void drawNPCPrompt(sf::RenderWindow& window, const GameState& state);
 private:
     sf::CircleShape playerShape{ 40.f };
     sf::Font font;

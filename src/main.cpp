@@ -62,6 +62,9 @@ int main()
         if (state.currentMenu == MenuState::LevelPrompt) {
             renderer.drawChangeLevelPrompt(window, state, sceneManager);
         }
+        if (state.currentMenu == MenuState::NPCPrompt) {
+            renderer.drawNPCPrompt(window, state);
+        }
         
         window.display();
     }

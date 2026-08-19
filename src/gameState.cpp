@@ -10,9 +10,11 @@ void GameState::getState() {
     int pointMultiplier;
     int playerMoveDir;
 
+    int currentNPC;
+
     bool gameOver;
     bool successfulEncounter;
-
+    
     std::vector<sf::Vector2f> enemyPositions;
     std::vector<float> enemySpeeds;
 
