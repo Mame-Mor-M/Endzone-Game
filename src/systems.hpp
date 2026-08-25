@@ -14,6 +14,16 @@ public:
     void update(GameState& state, SceneManager& scene);
 };
 
+class ReduceStamina {
+public:
+    void update(GameState& state, int amount);
+};
+
+class IncreaseStamina {
+public:
+    void update(GameState& state, int amount);
+};
+
 class ReduceHealth {
 public:
     void update(GameState& state, int posIndex, int amount, SceneManager& scene);
@@ -77,7 +87,7 @@ public:
 
 class JudgeEncounter {
 public:
-    void update(GameState& state);
+    void update(GameState& state, SceneManager& scene);
 };
 
 class NPCOverlap {

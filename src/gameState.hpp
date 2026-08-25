@@ -40,13 +40,21 @@ enum TackleType {
 
 
 struct GameState {
-    sf::Vector2f playerPosition{ 390.f, 500.f };
+    sf::Vector2f playerPosition{ 360.f, 300.f };
     std::vector<sf::Vector2f> enemyPositions;
     std::vector<float> enemySpeeds;
 
     int playerDowns = 4;
+
     int playerHealth = 100;
+    int maxHealth = 100;
+
+    int playerStamina = 100;
+    int maxStamina = 100;
+
     int healthLost = 0;
+    int staminaLost = 0;
+
     int totalPoints = 0;
     int totalYards = 0; // Spendable, this is the in-game currency
     int pointMultiplier = 1;

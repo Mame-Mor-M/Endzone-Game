@@ -85,10 +85,15 @@ void SceneChange::update(GameState& state, SceneManager& scene) {
     }
     else if (state.playerPosition.y <= 0 && scene.currentLevel != Level::Sideline) {
         int index = static_cast<int>(scene.currentLevel);
+        IncreasePoints pointIncrease;
         if (index < static_cast<size_t>(Level::Count) - 1) {
             index += 1;
             scene.SetCurrentScene(index);
             state.playerPosition = { 390.f, 500.f };
+        }
+        else {
+            std::cout << "Touchdown";
+            pointIncrease.update(state, 7);
         }
 
     }
@@ -99,6 +104,17 @@ void EnemySpawner::despawn(int index, SceneManager& scene) {
     //state.enemySpeeds.erase(state.enemySpeeds.begin() + index);
 
     scene.GetCurrentScene()->DespawnEnemy(index);
+}
+
+void ReduceStamina::update(GameState& state, int amount) {
+    state.playerStamina -= amount;
+    state.staminaLost = amount;
+
+    std::cout << "Player stamina reduced, now: " << state.playerStamina << "\n";
+
+    if (state.playerStamina <= 0) {
+        std::cout << "You are exhausted!\n";
+    }
 }
 
 void ReduceHealth::update(GameState& state, int posIndex, int amount, SceneManager& scene) {
@@ -118,13 +134,35 @@ void ReduceHealth::update(GameState& state, int posIndex, int amount, SceneManag
 void ReduceDowns::update(GameState& state, int posIndex, SceneManager& scene) {
     EnemySpawner spawner;
     state.playerDowns -= 1;
-
-    spawner.despawn(posIndex, scene);
-    std::cout << "ReduceDowns Remaining: " << state.playerDowns << "\n";
+    if (posIndex >= 0) {
+        spawner.despawn(posIndex, scene);
+    }
+    
+    std::cout << "Downs Remaining: " << state.playerDowns << "\n";
 
     if (state.playerDowns <= 0) {
-        std::cout << "GO TO THE SIDELINE AND WAIT FOR ReduceDowns TO RECHARGE" << "\n";
+        std::cout << "YOU RAN OUT OF DOWNS! GO TO THE SIDELINE!" << "\n";
     }
+}
+
+void IncreasePoints::update(GameState& state, int amount) {
+    // Points calculated by how many opposing players you encounter 
+    // before you reach the endzone. Tradeoff, try to eliminate as many
+    // enemies as possible while still reaching the endzone (YARDS)
+    state.totalPoints += amount * state.pointMultiplier + state.totalYards;
+}
+
+void IncreaseYards::update(GameState& state, int amount) {
+    state.totalYards += amount;
+}
+
+void IncreaseDowns::update(GameState& state, int amount) {
+    state.playerDowns += amount;
+
+}
+
+void IncreaseHealth::update(GameState& state, int amount) {
+    state.playerHealth += amount;
 }
 
 void EnemySpawner::update(GameState& state, int enemyNum, SceneManager& scene) {
@@ -299,7 +337,7 @@ void MenuSystem::handleEvent(GameState& state, const sf::Event& event, SceneMana
                     state.skillMove = SkillMove::Hurdle;
                     state.playerRoll = rollNum.update(state.hurdleProficiency * 1.5, 10);
                 }
-                judge.update(state);
+                judge.update(state, scene);
                 menuSystem.calculateResult(state, scene);
 
                 
@@ -366,19 +404,7 @@ void MenuSystem::handleEvent(GameState& state, const sf::Event& event, SceneMana
 
 void MenuSystem::calculateResult(GameState& state, SceneManager& scene) {
     int i = state.enemyIndex;
-    ReduceHealth healthDeduction;
-    ReduceDowns downsDeduction;
-    switch (state.skillMove) {
-    case (SkillMove::Truck):
-        healthDeduction.update(state, i, 10, scene );
-        break;
-    case (SkillMove::Juke):
-        healthDeduction.update(state, i, 5, scene);
-        break;
-    case (SkillMove::Hurdle):
-        healthDeduction.update(state, i, 15, scene);
-        break;
-    }
+
     state.menuSelection = 0;
     state.currentMenu = MenuState::ResultPrompt;
 }
@@ -389,32 +415,73 @@ int RollNumber::update(int min, int max) {
     return distrib(gen);
 }
 
-void JudgeEncounter::update(GameState& state) {
+void JudgeEncounter::update(GameState& state, SceneManager& scene) {
     int playerRoll = state.playerRoll;
     int opponentRoll = state.opponentRoll;
     int result = playerRoll - opponentRoll; // Positive number -> player wins, negative number -> enemy wins
 
 
+    int i = state.enemyIndex;
+    ReduceHealth healthDeduction;
+    ReduceDowns downsDeduction;
+    ReduceStamina staminaDeduction;
+
+    IncreaseYards yardsIncrease;
+
     if (state.opponentTackle == state.skill_counters[state.skillMove]) {
         result -= 5;
+        std::cout << "\nYou got countered\n";
     }
 
     if (state.skillMove == state.tackle_counters[state.opponentTackle]) {
         result += 5;
+        std::cout << "\nOpponent got countered\n";
     }
 
     if (result > 0) {
         // Player wins, check what type of skill move it was. A successful hurdle causes no reduction in health but lowers stamina tremendously
+        switch (state.skillMove) {
+        case(SkillMove::Hurdle):
+            healthDeduction.update(state, i, 0, scene);
+            staminaDeduction.update(state, 15);
+            downsDeduction.update(state, -1, scene);
+            break;
+        case(SkillMove::Truck):
+            healthDeduction.update(state, i, 5, scene);
+            staminaDeduction.update(state, 5);
+            downsDeduction.update(state, -1, scene);
+            break;
+        case(SkillMove::Juke):
+            healthDeduction.update(state, i, 0, scene);
+            staminaDeduction.update(state, 15);
+            downsDeduction.update(state, -1, scene);
+            break;
+        }
     }
     else if (result < 0) {
         // Enemy wins, if the enemy had a successful hit stick, cause a tremendous blow to health and stamina, especially if player hurdled
+                // Player wins, check what type of skill move it was. A successful hurdle causes no reduction in health but lowers stamina tremendously
+        switch (state.opponentTackle) {
+        case(TackleType::High):
+            healthDeduction.update(state, i, 25, scene);
+            staminaDeduction.update(state, 15);
+            break;
+        case(TackleType::Low):
+            healthDeduction.update(state, i, 15, scene);
+            staminaDeduction.update(state, 5);
+            break;
+        case(TackleType::HitStick):
+            healthDeduction.update(state, i, 20, scene);
+            staminaDeduction.update(state, 15);
+            break;
+        }
     }
     else{
     // Upon a tie, deduct minimal health and stamina
     }
 
-    std::cout << "\nYou rolled: " << playerRoll << "\nThe opponent rolled: " << opponentRoll << "\nFinal result: " << result << "\n";
+    std::cout << "You rolled: " << playerRoll << "\nThe opponent rolled: " << opponentRoll << "\nFinal result: " << result << "\n";
 
-
-
+    std::cout << "\nYou now have " << state.playerDowns << " downs remaining";
+    
 }

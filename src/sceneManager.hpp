@@ -16,7 +16,7 @@ class SceneManager {
 public:
     Scene* GetCurrentScene();
     void SetCurrentScene(int sceneIndex);
-    Level currentLevel = Level::OwnTerritory;
+    Level currentLevel = Level::Sideline;
 private:
-    Scene* currentScene = new OwnTerritoryScene();
+    Scene* currentScene = new SidelineScene();
 };

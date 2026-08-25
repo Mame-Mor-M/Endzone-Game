@@ -7,6 +7,7 @@ void SidelineScene::Load() {
 	npcs[3] = std::make_unique<NPC>("Water Boy", 360, 500);
 
 	name = "Sideline";
+
 }
 
 void SidelineScene::Update(float dt) {
