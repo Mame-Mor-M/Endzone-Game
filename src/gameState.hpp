@@ -14,6 +14,7 @@ enum class MenuState {
     ResultPrompt,
     LevelPrompt,
     NPCPrompt,
+    TouchdownPrompt,
 };
 
 enum class SkillMove {
@@ -28,7 +29,8 @@ enum class SkillMove {
 enum class NPCTypes {
     Coach,
     Trainer,
-    WaterBoy
+    WaterBoy,
+    None,
 };
 
 enum TackleType {
@@ -45,6 +47,7 @@ struct GameState {
     std::vector<float> enemySpeeds;
 
     int playerDowns = 4;
+    int maxDowns = 4;
 
     int playerHealth = 100;
     int maxHealth = 100;
@@ -55,10 +58,10 @@ struct GameState {
     int healthLost = 0;
     int staminaLost = 0;
 
-    int totalPoints = 0;
+    float totalPoints = 0;
     int totalYards = 0; // Spendable, this is the in-game currency
-    int pointMultiplier = 1;
-    std::string currentNPC = "";
+    float pointMultiplier = 1;
+    NPCTypes currentNPC = NPCTypes::None;
 
     int playerRoll;
     int opponentRoll;

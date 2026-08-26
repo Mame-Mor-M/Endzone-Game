@@ -49,6 +49,10 @@ public:
     void update(GameState& state, int amount);
 };
 
+class IncreaseMultiplier {
+public:
+    void update(GameState& state, float amount);
+};
 class ResetStats {
 public:
     void update(GameState& state);

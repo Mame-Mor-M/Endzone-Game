@@ -273,7 +273,7 @@ void Renderer::drawNPCPrompt(sf::RenderWindow& window, const GameState& state) {
     
 
 
-    if (state.currentNPC == "Coach") {
+    if (state.currentNPC == NPCTypes::Coach) {
         promptText.setString("Coach: We need some points.\nMaybe a little motivation\nwill help");
         yesText.setPosition({ 200.f, 530.f });
         noText.setPosition({ 200.f, 560.f });
@@ -281,10 +281,10 @@ void Renderer::drawNPCPrompt(sf::RenderWindow& window, const GameState& state) {
         yOffset = (state.menuSelection == 0) ? 530.f : 560.f;
 
     }
-    else if (state.currentNPC == "Trainer") {
+    else if (state.currentNPC == NPCTypes::Trainer) {
         promptText.setString("Trainer: Hey, how are you feeling out there?\n");
     }
-    else if (state.currentNPC == "Water Boy") {
+    else if (state.currentNPC == NPCTypes::WaterBoy) {
         promptText.setString("Water Boy: You're doing great! Need a refill?");
     }
 

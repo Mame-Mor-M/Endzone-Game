@@ -26,6 +26,6 @@ void SceneManager::SetCurrentScene(int sceneIndex) {
 		break;
 	}
 	currentScene->Load();
-	std::cout << "Changed level";
+	std::cout << "\nChanged level\n";
 	
 }

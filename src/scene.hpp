@@ -3,15 +3,14 @@
 
 class Scene {
 protected:
-	std::string name = "";
+	std::string npcType = "";
 public:
-
 	struct NPC {
-		std::string name;
+		NPCTypes npcType;
 		float x = 0.f;
 		float y = 0.f;
 
-		NPC(std::string name, float x, float y) : name(name), x(x), y(y) {}
+		NPC(NPCTypes npcType, float x, float y) : npcType(npcType), x(x), y(y) {}
 	};
 
 
