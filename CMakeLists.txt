@@ -12,7 +12,7 @@ FetchContent_Declare(SFML
     SYSTEM)
 FetchContent_MakeAvailable(SFML)
 
-add_executable(main src/main.cpp "src/gameState.cpp" "src/systems.cpp" "src/renderer.cpp"  "src/sidelineScene.cpp"  "src/sceneManager.cpp" "src/midfieldScene.cpp" "src/opposingTerritoryScene.cpp" "src/ownTerritoryScene.cpp")
+add_executable(main src/main.cpp "src/managers/gameState.cpp" "src/gameplay/systems.cpp" "src/graphics/renderer.cpp"  "src/levels/sidelineScene.cpp"  "src/managers/sceneManager.cpp" "src/levels/midfieldScene.cpp" "src/levels/opposingTerritoryScene.cpp" "src/levels/ownTerritoryScene.cpp")
 target_compile_features(main PRIVATE cxx_std_17)
 target_link_libraries(main PRIVATE SFML::Graphics)
 

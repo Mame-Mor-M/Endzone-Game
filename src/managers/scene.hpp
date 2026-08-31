@@ -1,5 +1,5 @@
 #pragma once
-#include "renderer.hpp"
+#include "../graphics/renderer.hpp"
 
 class Scene {
 protected:

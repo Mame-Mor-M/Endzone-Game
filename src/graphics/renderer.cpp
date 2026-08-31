@@ -1,7 +1,7 @@
 #include "renderer.hpp"
 #include <random>
 #include <iostream>
-#include "sceneManager.hpp"
+#include "../managers/sceneManager.hpp"
 
 int GenerateRandomNumber(int a, int b);
 sf::RectangleShape CreateDefender();

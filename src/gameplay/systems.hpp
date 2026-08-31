@@ -1,6 +1,6 @@
 #pragma once
-#include "gameState.hpp"
-#include "sceneManager.hpp"
+#include "../managers/gameState.hpp"
+#include "../managers/sceneManager.hpp"
 #include <SFML/Window/Event.hpp>
 
 struct NPC;

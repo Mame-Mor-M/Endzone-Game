@@ -1,7 +1,8 @@
 #include <SFML/Graphics.hpp>
-#include "gameState.hpp"
-#include "systems.hpp"
-#include "renderer.hpp"
+#include "managers/gameState.hpp"
+#include "gameplay/systems.hpp"
+#include "graphics/renderer.hpp"
+#include <iostream>
 
 int main()
 {

@@ -1,11 +1,11 @@
 #pragma once
-#include "scene.hpp"
+#include "../managers/scene.hpp"
 
 
-class OwnTerritoryScene : public Scene 
+class MidfieldScene : public Scene 
 {
 	protected:
-		std::string name = "OwnTerritory";
+		std::string name = "Midfield";
 	public:
 		void Load() override;
 		void Update(float dt) override;

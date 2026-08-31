@@ -1,6 +1,6 @@
 #pragma once
 #include <SFML/Graphics.hpp>
-#include "gameState.hpp"
+#include "../managers/gameState.hpp"
 
 
 class SceneManager;

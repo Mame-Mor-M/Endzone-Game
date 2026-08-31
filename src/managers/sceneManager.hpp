@@ -1,8 +1,8 @@
 #include "scene.hpp"
-#include "sidelineScene.hpp"
-#include "midfieldScene.hpp"
-#include "ownTerritoryScene.hpp"
-#include "opposingTerritoryScene.hpp"
+#include "../levels/sidelineScene.hpp"
+#include "../levels/midfieldScene.hpp"
+#include "../levels/ownTerritoryScene.hpp"
+#include "../levels/opposingTerritoryScene.hpp"
 
 enum Level {
     Sideline,

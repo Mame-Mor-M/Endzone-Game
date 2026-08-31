@@ -1,5 +1,5 @@
 #pragma once
-#include "scene.hpp"
+#include "../managers/scene.hpp"
 
 
 class OpposingTerritoryScene : public Scene 

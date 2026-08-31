@@ -1,22 +1,21 @@
 #pragma once
-#include "scene.hpp"
+#include "../managers/scene.hpp"
 
 
-class MidfieldScene : public Scene 
+
+class SidelineScene : public Scene 
 {
 	protected:
-		std::string name = "Midfield";
+		std::string name = "Sideline";
 	public:
 		void Load() override;
 		void Update(float dt) override;
 
 		std::vector<sf::Vector2f> GetEnemyPositions();
-		void SetEnemyPosition(int index, sf::Vector2f position);
-		void SpawnEnemy(int num);
-		void DespawnEnemy(int index);
+		const std::map<int, std::unique_ptr<NPC>>& GetNPCs();
 		std::vector<float> GetEnemySpeeds();
 	private:
-		std::map<int, NPC> npcs{};
+		std::map<int, std::unique_ptr<NPC>> npcs{};
 		std::vector<sf::Vector2f> enemyPositions;
 		std::vector<float> enemySpeeds;
 };
